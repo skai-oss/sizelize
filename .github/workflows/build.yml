@@ -25,21 +25,21 @@ jobs:
         run: |
           cargo rustc --release --target=x86_64-pc-windows-gnu -- -C linker=x86_64-w64-mingw32-gcc
           mkdir builds/sizelize-win64
-          cp target/x86_64-pc-windows-gnu/release/swp.exe builds/sizelize-win64
+          cp target/x86_64-pc-windows-gnu/release/sizelize.exe builds/sizelize-win64
           tar -C builds -czvf dist/sizelize-win64.tar.gz sizelize-win64
 
       - name: Build Win32
         run: |
           cargo rustc --release --target=i686-pc-windows-gnu -- -C linker=i686-w64-mingw32-gcc -C link-args=-mwindows -C panic=abort
           mkdir builds/sizelize-win32
-          cp target/i686-pc-windows-gnu/release/swp.exe builds/sizelize-win32
+          cp target/i686-pc-windows-gnu/release/sizelize.exe builds/sizelize-win32
           tar -C builds -czvf dist/sizelize-win32.tar.gz sizelize-win32
 
       - name: Build Linux
         run: |
           cargo rustc --release --target=x86_64-unknown-linux-gnu
           mkdir builds/sizelize-linux
-          cp target/x86_64-unknown-linux-gnu/release/swp builds/sizelize-linux
+          cp target/x86_64-unknown-linux-gnu/release/sizelize builds/sizelize-linux
           tar -C builds -czvf dist/sizelize-linux.tar.gz sizelize-linux
 
       - name: Cache Mac OS dependencies
