@@ -28,4 +28,14 @@ const getBinary = () => {
   return new Binary("sizelize", url);
 };
 
-module.exports = getBinary;
+const run = () => {
+  const binary = getBinary();
+  binary.run();
+};
+
+const install = () => {
+  const binary = getBinary();
+  binary.install();
+};
+
+module.exports = { install, run };
