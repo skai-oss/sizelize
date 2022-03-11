@@ -1,0 +1,18 @@
+{
+  "name": "John Doe",
+  "age": 43,
+  "phones": [
+    "+44 1234567",
+    "+44 2345678"
+  ],
+  "sizeable": [
+    {
+      "path": "./samples/**/*.js",
+      "max_size": "5 kb"
+    },
+    {
+      "path": "./samples2/**/*.js",
+      "max_size": "1 kb"
+    }
+  ]
+}
