@@ -1,6 +1,8 @@
 name: build
 
-on: [push]
+on:
+  push:
+    tags: ["v*.*.*"]
 
 jobs:
   build:
@@ -62,3 +64,22 @@ jobs:
           mkdir builds/sizelize
           cp target/x86_64-apple-darwin/release/sizelize builds/sizelize
           tar -C builds -czvf dist/sizelize-macos.tar.gz sizelize
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          files: |
+            dist/sizelize-win64.tar.gz
+            dist/sizelize-win32.tar.gz
+            dist/sizelize-linux.tar.gz
+            dist/sizelize-macos.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Publish npm package
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ".npmrc"
+          npm publish

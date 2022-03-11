@@ -1,0 +1,21 @@
+{
+  "name": "@skai-ui/sizelize",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "https://github.com/skai-oss/sizelize.git",
+  "author": "liorheber <lior.heber@skai.io>",
+  "license": "MIT",
+  "bin": {
+    "sizelize": "npm/run.js"
+  },
+  "scripts": {
+    "preinstall": "node npm/scripts.js uninstall",
+    "postinstall": "node npm/scripts.js install"
+  },
+  "files": [
+    "npm/**/*"
+  ],
+  "dependencies": {
+    "binary-install": "^0.1.1"
+  }
+}
