@@ -1,34 +1,31 @@
 const { Binary } = require("binary-install");
 const os = require("os");
 
-function getPlatform() {
+const getPlatform = () => {
   const type = os.type();
   const arch = os.arch();
 
-  if (type === "Windows_NT") {
-    if (arch === "x64") {
-      return "win64";
+  if (arch === "x64") {
+    switch (type) {
+      case "Windows_NT":
+        return "win64";
+      case "Linux":
+        return "linux";
+      case "Darwin":
+        return "macos";
     }
-  }
-
-  if (type === "Linux" && arch === "x64") {
-    return "linux";
-  }
-
-  if (type === "Darwin" && arch === "x64") {
-    return "macos";
   }
 
   throw new Error(
     `Unsupported platform: ${type} ${arch}. Please create an issue at https://github.com/skai-oss/sizelize/issues`
   );
-}
+};
 
-function getBinary() {
+const getBinary = () => {
   const platform = getPlatform();
   const version = require("../package.json").version;
-  const url = `https://github.com/skai-oss/sizelize/releases/download/v${version}/sweep-${platform}.tar.gz`;
-  return new Binary(url, { name: "sizelize" });
-}
+  const url = `https://github.com/skai-oss/sizelize/releases/download/v${version}/sizelize-${platform}.tar.gz`;
+  return new Binary("sizelize", url);
+};
 
 module.exports = getBinary;
