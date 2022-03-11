@@ -1,18 +1,14 @@
 use structopt::StructOpt;
 
-
 use crate::config_reader::read_config;
-use crate::scanner::scan_files;
 use crate::messages::print_process_result;
-use crate::test_file::test;
+use crate::scanner::scan_files;
 
-
-mod config_struct;
-mod config_reader;
 mod compressor;
-mod scanner;
+mod config_reader;
+mod config_struct;
 mod messages;
-mod test_file;
+mod scanner;
 
 const DEFAULT_PACKAGE_JSON: &str = "./package.json";
 
@@ -20,12 +16,12 @@ const DEFAULT_PACKAGE_JSON: &str = "./package.json";
 #[structopt(name = "sizelize")]
 struct Opt {
     #[structopt(short, long, default_value = DEFAULT_PACKAGE_JSON)]
-    path: String
+    path: String,
 }
 
 fn main() {
     let opt = Opt::from_args();
     let config = read_config(opt.path).unwrap();
-    let res = scan_files(&config, test);
-    print_process_result(res)
+    let results = scan_files(&config);
+    print_process_result(results)
 }

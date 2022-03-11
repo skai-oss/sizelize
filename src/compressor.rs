@@ -1,11 +1,10 @@
-
-use flate2::Compression;
 use flate2::write::GzEncoder;
+use flate2::Compression;
 
+use byte_unit::Byte;
 use std::fs::File;
 use std::io::copy;
 use std::io::BufReader;
-use byte_unit::Byte;
 
 pub fn compress(path: &str) -> Byte {
     let mut input = BufReader::new(File::open(path).unwrap());
