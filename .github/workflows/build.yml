@@ -71,7 +71,6 @@ jobs:
           body_path: CHANGELOG.md
           files: |
             dist/sizelize-win64.tar.gz
-            dist/sizelize-win32.tar.gz
             dist/sizelize-linux.tar.gz
             dist/sizelize-macos.tar.gz
         env:
