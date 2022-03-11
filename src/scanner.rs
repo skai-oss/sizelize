@@ -11,7 +11,7 @@ pub fn scan_files(configs: &Vec<FileConfig>, test: fn(&str, &String) -> bool) ->
             match entry {
                 Ok(path) => {
                     let path_str = path.into_os_string().into_string().unwrap();
-                    if test(&path_str, &config.max_size) {
+                    if !test(&path_str, &config.max_size) {
                         res = false;
                     }
                 },

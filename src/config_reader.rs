@@ -8,5 +8,5 @@ pub fn read_config(path: String) -> Result<Vec<FileConfig>> {
 
     let package_json: PackageJson = serde_json::from_str(&data).expect("Unable to parse json");
 
-    Ok(package_json.sizeable)
+    Ok(package_json.sizelize)
 }

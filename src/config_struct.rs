@@ -8,5 +8,5 @@ pub struct FileConfig {
 
 #[derive(Serialize, Deserialize)]
 pub struct PackageJson {
-    pub sizeable: Vec<FileConfig>,
+    pub sizelize: Vec<FileConfig>,
 }
