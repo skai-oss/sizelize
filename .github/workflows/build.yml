@@ -38,16 +38,11 @@ jobs:
           cp target/x86_64-unknown-linux-gnu/release/sizelize builds/sizelize-linux
           tar -C builds -czvf dist/sizelize-linux.tar.gz sizelize-linux
 
-      - name: Cache Mac OS dependencies
-        id: cache-macos
-        uses: actions/cache@v1
-        with:
-          path: osxcross
-          key: ${{ runner.os }}-osxcross
-
       - name: Install Mac OS dependencies
         if: steps.cache-macos.outputs.cache-hit != 'true'
         run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf bison build-essential flex gawk gettext g++ help2man libncurses-dev libtool-bin texinfo unzip
           git clone https://github.com/tpoechtrager/osxcross
           cd osxcross
           sudo tools/get_dependencies.sh
@@ -66,30 +61,13 @@ jobs:
           cp target/x86_64-apple-darwin/release/sizelize builds/sizelize
           tar -C builds -czvf dist/sizelize-macos.tar.gz sizelize
 
-      - name: Install crosstool-ng dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool curl make g++ unzip pkg-config help2man
-        
-      - name: Setup crosstool-ng for aarch64-apple-darwin
-        run: |
-          git clone https://github.com/crosstool-ng/crosstool-ng
-          cd crosstool-ng
-          ./bootstrap
-          ./configure --prefix=`pwd`
-          make
-          make install
-          ./ct-ng aarch64_apple_darwin
-          ./ct-ng build
-
       - name: Build Darwin arm64
         run: |
-          export PATH="/path/to/crosstool-ng/bin:$PATH"  # Adjust this path
+          export PATH="$(pwd)/osxcross/target/bin:$PATH"
           cargo build --release --target aarch64-apple-darwin
           mkdir builds/sizelize-darwin-arm64
           cp target/aarch64-apple-darwin/release/sizelize builds/sizelize-darwin-arm64
           tar -C builds -czvf dist/sizelize-darwin-arm64.tar.gz sizelize-darwin-arm64
-
 
       - name: Upload release
         uses: softprops/action-gh-release@v1
