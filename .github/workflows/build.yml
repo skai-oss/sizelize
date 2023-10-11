@@ -1,91 +1,60 @@
-name: build
+name: Build and Publish
 
 on:
   push:
-    tags: ["v*.*.*"]
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        target: [x86_64-unknown-linux-gnu, x86_64-pc-windows-msvc, x86_64-apple-darwin, aarch64-apple-darwin]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+      
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/sizelize
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install gcc-mingw-w64-x86-64 gcc-mingw-w64-i686
-          rustup target add x86_64-pc-windows-gnu
-          rustup target add i686-pc-windows-gnu
-          rustup target add x86_64-unknown-linux-gnu
-          rustup target add x86_64-apple-darwin
-          rustup target add aarch64-apple-darwin
-          mkdir dist
-          mkdir builds
-
-      - name: Build Win64
-        run: |
-          cargo rustc --release --target=x86_64-pc-windows-gnu -- -C linker=x86_64-w64-mingw32-gcc
-          mkdir builds/sizelize-win64
-          cp target/x86_64-pc-windows-gnu/release/sizelize.exe builds/sizelize-win64
-          tar -C builds -czvf dist/sizelize-win64.tar.gz sizelize-win64
-
-      - name: Build Linux
-        run: |
-          cargo rustc --release --target=x86_64-unknown-linux-gnu
-          mkdir builds/sizelize-linux
-          cp target/x86_64-unknown-linux-gnu/release/sizelize builds/sizelize-linux
-          tar -C builds -czvf dist/sizelize-linux.tar.gz sizelize-linux
-
-      - name: Install Mac OS dependencies
-        if: steps.cache-macos.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y autoconf bison build-essential flex gawk gettext g++ help2man libncurses-dev libtool-bin texinfo unzip
-          git clone https://github.com/tpoechtrager/osxcross
-          cd osxcross
-          sudo tools/get_dependencies.sh
-          wget -nc https://s3.dockerproject.org/darwin/v2/MacOSX10.10.sdk.tar.xz
-          mv MacOSX10.10.sdk.tar.xz tarballs/
-          UNATTENDED=yes OSX_VERSION_MIN=10.7 ./build.sh
-
-      - name: Build Mac OS
-        run: |
-          export PATH="$(pwd)/osxcross/target/bin:$PATH"
-          export LIBZ_SYS_STATIC=1
-          export CC=o64-clang
-          export CXX=o64-clang++
-          cargo build --release --target "x86_64-apple-darwin"
-          mkdir builds/sizelize
-          cp target/x86_64-apple-darwin/release/sizelize builds/sizelize
-          tar -C builds -czvf dist/sizelize-macos.tar.gz sizelize
-
-      - name: Build Darwin arm64
-        run: |
-          export PATH="$(pwd)/osxcross/target/bin:$PATH"
-          export CC=aarch64-apple-darwin20.2-clang
-          export CXX=aarch64-apple-darwin20.2-clang++
-          cargo build --release --target aarch64-apple-darwin
-          mkdir builds/sizelize-darwin-arm64
-          cp target/aarch64-apple-darwin/release/sizelize builds/sizelize-darwin-arm64
-          tar -C builds -czvf dist/sizelize-darwin-arm64.tar.gz sizelize-darwin-arm64
-
-      - name: Upload release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: CHANGELOG.md
-          files: |
-            dist/sizelize-win64.tar.gz
-            dist/sizelize-linux.tar.gz
-            dist/sizelize-macos.tar.gz
-            dist/sizelize-darwin-arm64.tar.gz
+        run: npm install
+        
+      - name: Publish to npm
+        run: npm publish --access public
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Publish npm package
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ".npmrc"
-          npm publish
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
